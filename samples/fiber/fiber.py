@@ -299,26 +299,11 @@ def detect(model, dataset_dir, subset):
         f.write(submission)
     print("Saved to ", submit_dir)
 
-# config = FiberInferenceConfig()
-# model = modellib.MaskRCNN(mode="inference", config=config,
-#                                   model_dir=ROOT_DIR)
-# weights_path = model.find_last()
-# model.load_weights(weights_path, by_name=True)
+config = FiberInferenceConfig()
+model = modellib.MaskRCNN(mode="inference", config=config,
+                                  model_dir=ROOT_DIR)
+weights_path = model.find_last()
+model.load_weights(weights_path, by_name=True)
 
-# subset = "val"
-# # print(weights_path)
-# # detect(model, DATASET_DIR, subset)
-# from skimage import io
-# img = io.imread('avg_stack.png')
-# from skimage.transform import resize
-# image_resized = resize(img, (512,512),
-#                        anti_aliasing=True)
-# print(image_resized.shape)
-
-# r = model.detect([image_resized*255], verbose=0)[0]
-# visualize.display_instances(
-#         image, r['rois'], r['masks'], r['class_ids'],
-#         dataset.class_names,
-#         show_bbox=True, show_mask=True,
-#         title="Predictions")
-# plt.savefig("{}/{}.png".format(os.getcwd(), 'test'))
+subset = "val"
+detect(model, DATASET_DIR, subset)
