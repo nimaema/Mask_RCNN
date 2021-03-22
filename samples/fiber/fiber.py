@@ -26,8 +26,8 @@ from mrcnn import utils
 from mrcnn import model as modellib
 from mrcnn import visualize
 # COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
-# import fiber
-# Path to trained weights file
+# # import fiber
+# # Path to trained weights file
 # COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
 # Directory to save logs and model checkpoints, if not provided
@@ -40,7 +40,7 @@ RESULTS_DIR = os.path.join(ROOT_DIR, "results/fiber")
 
 # The dataset doesn't have a standard train/val split, so I picked
 # a variety of images to surve as a validation set.
-VAL_IMAGE_IDS = [str(i) for i in range(1,7)]
+VAL_IMAGE_IDS = [str(i) for i in range(1,8)]
 
 
 
@@ -61,7 +61,7 @@ class FiberConfig(Config):
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 24
+    IMAGES_PER_GPU = 2
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + fiber
@@ -70,7 +70,7 @@ class FiberConfig(Config):
     # Skip detections with < 90% confidence
     DETECTION_MIN_CONFIDENCE = 0.90
     
-    STEPS_PER_EPOCH = (8673 - len(VAL_IMAGE_IDS)) // IMAGES_PER_GPU
+    STEPS_PER_EPOCH = (41 - len(VAL_IMAGE_IDS)) // IMAGES_PER_GPU
     VALIDATION_STEPS = max(1, len(VAL_IMAGE_IDS) // IMAGES_PER_GPU)
 
 
@@ -81,7 +81,7 @@ class FiberInferenceConfig(FiberConfig):
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
     # Don't resize imager for inferencing
-    IMAGE_RESIZE_MODE = "pad64"
+    IMAGE_RESIZE_MODE = "square"
     # Non-max suppression threshold to filter RPN proposals.
     # You can increase this during training to generate more propsals.
     RPN_NMS_THRESHOLD = 0.7
@@ -193,8 +193,8 @@ model = modellib.MaskRCNN(mode="training", config=config,
 # tf.test.gpu_device_name()
 print("Train network heads")
 model.train(dataset_train, dataset_val,
-            learning_rate=config.LEARNING_RATE/3,
-            epochs=250,
+            learning_rate=config.LEARNING_RATE/10,
+            epochs=25,
             layers='all')
 
 
@@ -288,7 +288,7 @@ def detect(model, dataset_dir, subset):
         visualize.display_instances(
             image, r['rois'], r['masks'], r['class_ids'],
             dataset.class_names,
-            show_bbox=False, show_mask=True,
+            show_bbox=True, show_mask=True,
             title="Predictions")
         plt.savefig("{}/{}.png".format(submit_dir, dataset.image_info[image_id]["id"]))
 
@@ -299,12 +299,26 @@ def detect(model, dataset_dir, subset):
         f.write(submission)
     print("Saved to ", submit_dir)
 
-config = FiberInferenceConfig()
-model = modellib.MaskRCNN(mode="inference", config=config,
-                                  model_dir=ROOT_DIR)
-weights_path = model.find_last()
-model.load_weights(weights_path, by_name=True)
+# config = FiberInferenceConfig()
+# model = modellib.MaskRCNN(mode="inference", config=config,
+#                                   model_dir=ROOT_DIR)
+# weights_path = model.find_last()
+# model.load_weights(weights_path, by_name=True)
 
-subset = "val"
+# subset = "val"
+# # print(weights_path)
+# # detect(model, DATASET_DIR, subset)
+# from skimage import io
+# img = io.imread('avg_stack.png')
+# from skimage.transform import resize
+# image_resized = resize(img, (512,512),
+#                        anti_aliasing=True)
+# print(image_resized.shape)
 
-detect(model, DATASET_DIR, subset)
+# r = model.detect([image_resized*255], verbose=0)[0]
+# visualize.display_instances(
+#         image, r['rois'], r['masks'], r['class_ids'],
+#         dataset.class_names,
+#         show_bbox=True, show_mask=True,
+#         title="Predictions")
+# plt.savefig("{}/{}.png".format(os.getcwd(), 'test'))
