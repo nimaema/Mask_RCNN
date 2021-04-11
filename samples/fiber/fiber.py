@@ -86,6 +86,7 @@ class FiberInferenceConfig(FiberConfig):
     # You can increase this during training to generate more propsals.
     RPN_NMS_THRESHOLD = 0.7
 
+    USE_MINI_MASK = False
 
 ############################################################
 #  Dataset
